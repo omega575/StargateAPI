@@ -1,4 +1,6 @@
-﻿namespace StargateAPI.Controllers
+﻿using StargateAPI.Business.Requests;
+
+namespace StargateAPI.Controllers
 {
    
     [ApiController]
@@ -104,12 +106,12 @@
 
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePerson(int id, [FromBody] string? name)
+        [HttpPut()]
+        public async Task<IActionResult> UpdatePerson([FromBody] UpdatePersonRequest request)
         {
             try
             {
-                var result = await _mediator.Send(new UpdatePerson() { Id = id, Name = name });
+                var result = await _mediator.Send(new UpdatePerson() { Id = request.Id, Name = request.Name });
 
                 return this.GetResponse(result);
             }
