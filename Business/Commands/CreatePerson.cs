@@ -5,13 +5,10 @@
         public required string Name { get; set; } = string.Empty;
     }
 
-    public class CreatePersonPreProcessor : IRequestPreProcessor<CreatePerson>
+    public class CreatePersonPreProcessor(StargateContext context) : IRequestPreProcessor<CreatePerson>
     {
-        private readonly StargateContext _context;
-        public CreatePersonPreProcessor(StargateContext context)
-        {
-            _context = context;
-        }
+        private readonly StargateContext _context = context;
+
         public Task Process(CreatePerson request, CancellationToken cancellationToken)
         {
             var person = _context.People.AsNoTracking().FirstOrDefault(z => z.Name == request.Name);

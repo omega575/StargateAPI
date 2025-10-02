@@ -15,7 +15,8 @@
         {
             try
             {
-                var result = await _mediator.Send(new GetPersonByName()
+                // Update this to correct query
+                var result = await _mediator.Send(new GetAstronautDutiesByName()
                 {
                     Name = name
                 });

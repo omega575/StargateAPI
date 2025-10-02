@@ -44,29 +44,25 @@
         }
         public async Task<CreateAstronautDutyResult> Handle(CreateAstronautDuty request, CancellationToken cancellationToken)
         {
-
-            var query = $"SELECT * FROM [Person] WHERE \'{request.Name}\' = Name";
-
-            var person = await _context.Connection.QueryFirstOrDefaultAsync<Person>(query);
-
-            query = $"SELECT * FROM [AstronautDetail] WHERE {person.Id} = PersonId";
-
-            var astronautDetail = await _context.Connection.QueryFirstOrDefaultAsync<AstronautDetail>(query);
+            // This cannot be null since we have pre-processed it
+            var person = await _context.People.FirstAsync(x => x.Name.Equals(request.Name), cancellationToken);
+            var astronautDetail = await _context.AstronautDetails.FirstOrDefaultAsync(x => x.PersonId == person.Id, cancellationToken);
 
             if (astronautDetail == null)
             {
-                astronautDetail = new AstronautDetail();
-                astronautDetail.PersonId = person.Id;
-                astronautDetail.CurrentDutyTitle = request.DutyTitle;
-                astronautDetail.CurrentRank = request.Rank;
-                astronautDetail.CareerStartDate = request.DutyStartDate.Date;
+                astronautDetail = new AstronautDetail
+                {
+                    PersonId = person.Id,
+                    CurrentDutyTitle = request.DutyTitle,
+                    CurrentRank = request.Rank,
+                    CareerStartDate = request.DutyStartDate.Date
+                };
                 if (request.DutyTitle == "RETIRED")
                 {
                     astronautDetail.CareerEndDate = request.DutyStartDate.Date;
                 }
 
-                await _context.AstronautDetails.AddAsync(astronautDetail);
-
+                await _context.AstronautDetails.AddAsync(astronautDetail, cancellationToken);
             }
             else
             {
@@ -79,9 +75,7 @@
                 _context.AstronautDetails.Update(astronautDetail);
             }
 
-            query = $"SELECT * FROM [AstronautDuty] WHERE {person.Id} = PersonId Order By DutyStartDate Desc";
-
-            var astronautDuty = await _context.Connection.QueryFirstOrDefaultAsync<AstronautDuty>(query);
+            var astronautDuty = await _context.AstronautDuties.FirstOrDefaultAsync(x => x.PersonId == person.Id);
 
             if (astronautDuty != null)
             {
@@ -98,9 +92,9 @@
                 DutyEndDate = null
             };
 
-            await _context.AstronautDuties.AddAsync(newAstronautDuty);
+            await _context.AstronautDuties.AddAsync(newAstronautDuty, cancellationToken);
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
 
             return new CreateAstronautDutyResult()
             {
