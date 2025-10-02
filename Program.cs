@@ -1,3 +1,5 @@
+using Serilog;
+
 var corsPolicy = "_policy";
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +26,15 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly);
 });
 
+// Logging
+var logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.MSSqlServer(
+    connectionString: builder.Configuration.GetConnectionString("StarbaseApiDatabase"), tableName: "Logs", autoCreateSqlTable: true).CreateLogger();
+
+builder.Services.AddSerilog();
+
 var app = builder.Build();
+
+app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
