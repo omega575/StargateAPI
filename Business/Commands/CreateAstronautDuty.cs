@@ -11,10 +11,10 @@
         public DateTime DutyStartDate { get; set; }
     }
 
-    public class CreateAstronautDutyPreProcessor(StargateContext context, Serilog.ILogger logger) : IRequestPreProcessor<CreateAstronautDuty>
+    public class CreateAstronautDutyPreProcessor(StargateContext context) : IRequestPreProcessor<CreateAstronautDuty>
     {
         private readonly StargateContext _context = context;
-        private readonly Serilog.ILogger _logger = logger;
+        //private readonly Serilog.ILogger _logger = logger;
 
         public Task Process(CreateAstronautDuty request, CancellationToken cancellationToken)
         {
@@ -22,7 +22,7 @@
 
             if (person is null)
             {
-                _logger.Error("Person was null when creating astronaut duty");
+                //_logger.Error("Person was null when creating astronaut duty");
                 throw new BadHttpRequestException("Bad Request");
             }
 
